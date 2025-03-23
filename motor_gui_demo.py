@@ -62,13 +62,13 @@ class MotorControlApp:
             line_color='black',
             line_width=1
         )
-        self.motor_arrow = self.motor_canvas.draw_line(
-            (100, 100), 
-            (100, 150),
-            width=3, 
-            color='red',
-            arrow='last'
-        )
+        # self.motor_arrow = self.motor_canvas.draw_line(
+        #     (100, 100), 
+        #     (100, 150),
+        #     width=3, 
+        #     color='red',
+        #     arrow='last'
+        # )
         # 添加角度指示
         for angle in range(0, 360, 30):
             x1 = 100 + 70 * math.cos(math.radians(angle))
@@ -150,7 +150,7 @@ class MotorControlApp:
             actual_speed = int((self.current_speed / 100) * self.mode_run.V_MAX)
             
             # 更新电机动画
-            self.update_motor_animation(self.current_speed)
+            # self.update_motor_animation(self.current_speed)
             
             return actual_speed
             
@@ -249,9 +249,9 @@ class MotorControlApp:
                     self.mode_run.disable_motor()
                     self.log_message("电机已停止")
 
-            # 持续更新电机动画
-            if self.mode_run and (self.mode_run.speed_mode_active or self.mode_run.jog_mode_active):
-                self.update_motor_animation(self.current_speed)
+            # # 持续更新电机动画
+            # if self.mode_run and (self.mode_run.speed_mode_active or self.mode_run.jog_mode_active):
+            #     self.update_motor_animation(self.current_speed)
 
         self.window.close()
 

@@ -36,3 +36,5 @@
 - pyserial (用于串口通信)
 
 ### 安装依赖
+
+- 注意: PySimpleGUI最新5.0以上版本都开始收费，请安装pip install PySimpleGUI-4-foss
