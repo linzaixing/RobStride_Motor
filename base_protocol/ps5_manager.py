@@ -1,7 +1,7 @@
-
 import pygame
 import time
-import motor_manager
+from .motor_manager import ModeRun
+import sys
 
 class ps5_controller:
     """PS5遥控器模式控制类"""
@@ -9,7 +9,7 @@ class ps5_controller:
     def __init__(self, motor_id: int):
         """初始化PS5手柄控制相关变量"""
         self.motor_id = motor_id
-        self.motor_ctr = motor_manager.ModeRun(self.motor_id)
+        self.motor_ctr = ModeRun(self.motor_id)
         self.jog_mode_active = self.motor_ctr.jog_mode_active
         self.speed_mode_active = self.motor_ctr.speed_mode_active
         self.iq_mode_active = self.motor_ctr.iq_mode_active
@@ -17,26 +17,31 @@ class ps5_controller:
         self.jog_speed_cw = self.motor_ctr.jog_speed_cw
         self.jog_speed_ccw = self.motor_ctr.jog_speed_ccw
         
-    def handle_ps5_input(self) -> None:
-        """处理PS5手柄输入"""
         pygame.init()
         pygame.joystick.init()
         
-        if pygame.joystick.get_count() == 0:
-            print("未检测到PS5手柄")
-            return
+        try:
+            self.joystick = pygame.joystick.Joystick(0)
+            self.joystick.init()
+            print("PS5控制器已连接")
+        except:
+            print("未检测到PS5控制器")
+            sys.exit()
 
-        joystick = pygame.joystick.Joystick(0)
-        joystick.init()
-
-        print("PS5手柄已连接")
-
+    def handle_ps5_input(self) -> None:
+        """处理PS5手柄输入"""
         while True:
             for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    return
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_q:  # 按下q键退出
+                        print("程序已退出")
+                        return
                 if event.type == pygame.JOYBUTTONDOWN:
                     if event.button == 0:
                         print('按钮0: 叉按钮-->停止所有运动')
-                        self.motor_ctr.stop_motion()
+                        self.motor_ctr.disable_motor()
                         self.motor_ctr.jog_stop()
                         self.jog_mode_active = False  # 标记JOG模式是否激活
                         self.speed_mode_active = False  # 标记速度模式是否激活
@@ -49,7 +54,7 @@ class ps5_controller:
                         if self.iq_mode_active:
                             print("进入电流模式")
                         else:
-                            self.motor_ctr.stop_motion()
+                            self.motor_ctr.disable_motor()
                             print("退出电流模式")
                     elif event.button == 2:
                         print('按钮2: 方形按钮-->位置模式 PP')
@@ -62,13 +67,13 @@ class ps5_controller:
                         if self.speed_mode_active:
                             print("进入速度模式")
                         else:
-                            self.motor_ctr.stop_motion()
+                            self.motor_ctr.disable_motor()
                             print("退出速度模式")
                     elif event.button == 4:
                         print('按钮4: SHARE按钮')
                     elif event.button == 5:
                         print('按钮5: PS按钮-->退出程序')
-                        self.motor_ctr.stop_motion()
+                        self.motor_ctr.disable_motor()
                         self.motor_ctr.jog_stop()
                         pygame.quit()
                         return
@@ -110,7 +115,7 @@ class ps5_controller:
             # 如果JOG模式激活，读取摇杆值
             if self.jog_mode_active:
                 # 获取左摇杆的X轴值（通常为axis 0）
-                axis_value = joystick.get_axis(0)
+                axis_value = self.joystick.get_axis(0)
                 if axis_value > 0.5:  # 右摇
                     self.motor_ctr.jog_control("CW", speed_value=self.jog_speed_cw)
                 elif axis_value < -0.5:  # 左摇
@@ -122,24 +127,46 @@ class ps5_controller:
             if self.speed_mode_active:
                 if self.iq_speed_activate:
                     continue
-                axis_value = joystick.get_axis(2)  # 右摇杆X轴
+                axis_value = self.joystick.get_axis(2)  # 右摇杆X轴
                 speed_val = int(axis_value * self.motor_ctr.V_MAX)
                 if abs(axis_value) > 0.1:
                     self.motor_ctr.speed_control(spd_ref=speed_val)
                 else:
-                    self.motor_ctr.stop_motion()
+                    self.motor_ctr.disable_motor()
                     
             # 如果电流模式激活，读取右摇杆值
             if self.iq_mode_active:
                 if self.iq_speed_activate:
                     continue
-                axis_value = joystick.get_axis(2)  # 右摇杆X轴
+                axis_value = self.joystick.get_axis(2)  # 右摇杆X轴
                 iq_val = int(axis_value * 16)  # 假设最大电流为10A
                 if abs(axis_value) > 0.1:
                     self.motor_ctr.iq_control(iq_val=iq_val)
                 else:
-                    self.motor_ctr.stop_motion()
+                    self.motor_ctr.disable_motor()
                     
             time.sleep(0.1)  # 防止CPU占用过高
+
+    def update(self):
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                return False
+                
+            # 检测键盘按键
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_q:  # 按下q键退出
+                    print("程序已退出")
+                    return False
+                    
+        return True
+
+    def get_axis(self, axis_id):
+        return self.joystick.get_axis(axis_id)
+
+    def get_button(self, button_id):
+        return self.joystick.get_button(button_id)
+
+    def close(self):
+        pygame.quit()
 
     

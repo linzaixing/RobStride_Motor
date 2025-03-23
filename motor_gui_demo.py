@@ -1,13 +1,15 @@
 import PySimpleGUI as sg
-from motor_manager import ModeRun
+from base_protocol.motor_manager import ModeRun
 import math
+from base_protocol.serial_manager import SerialConnect
 
 class MotorControlApp:
-    def __init__(self):
-        self.motor_id = 1
+    def __init__(self, mode_id=1):
+        self.motor_id = mode_id
         self.mode_run = None
         self.current_speed = 0
         self.speed_step = 5
+        self.serial = None
         
         self.connect_status = False
         self.JOG_status = False
@@ -27,7 +29,10 @@ class MotorControlApp:
             [sg.Text('端口号:'), sg.Combo(['COM1', 'COM2', 'COM3', 'COM4', 'COM5'], 
                                      default_value='COM5',
                                      key='-PORT-', size=(10, 1))],
-            [sg.Button('连接电机', size=(8, 1))],
+            [sg.Text('电机ID:'), sg.Combo(['1', '2', '3', '4', '5', '6'], 
+                                     default_value='1',
+                                     key='-ID-', size=(10, 1))],
+            [sg.Button('连接串口', size=(8, 1)), sg.Button('初始化电机', size=(8, 1))],
             [sg.Button('JOG模式', size=(8, 1)), sg.Button('+', size=(3, 1)), sg.Button('-', size=(3, 1))],
             [sg.Text('控制模式:'), sg.Combo(['运控模式', '位置模式(PP)', '速度模式', '电流模式', '位置模式(CSP)'], 
                                       default_value='速度模式',
@@ -42,7 +47,7 @@ class MotorControlApp:
         ]
         
         # 然后创建窗口
-        self.window = sg.Window('电机控制', self.layout, finalize=True)
+        self.window = sg.Window('电机控制', self.layout, finalize=True, icon=r'RobStride_Motor\icons\steppermotor_5459.ico')
         
         # 现在可以安全地进行图形操作
         self.motor_circle = self.motor_canvas.draw_circle(
@@ -76,7 +81,7 @@ class MotorControlApp:
     def jog_run(self, direction):
         """更新速度值"""
         if not self.mode_run:
-            self.log_message("请先连接电机！")
+            self.log_message("请先初始化电机")
             return
             
         self.mode_run.jog_mode_active = not self.mode_run.jog_mode_active
@@ -91,6 +96,8 @@ class MotorControlApp:
                 self.mode_run.jog_control("CCW")
         else:
             self.mode_run.jog_stop()
+            self.mode_run.disable_motor()
+            # self.mode_run.enable_motor()
             self.log_message("退出JOG模式")
 
     def log_message(self, message):
@@ -158,21 +165,28 @@ class MotorControlApp:
             if event == sg.WIN_CLOSED or event == '退出':
                 if self.mode_run:
                     self.mode_run.jog_stop()
-                    self.mode_run.stop_motion()
+                    self.mode_run.disable_motor()
                     self.log_message("电机已停止")
                 break
             
             elif event == '-SPEED_SLIDER-':
                 if self.mode_run:
                     self.update_speed(values)
-            
-            elif event == '连接电机':
-                motor_id = 1
+                    
+            elif event == '连接串口':
                 port = values['-PORT-']
                 if not port:
-                    self.log_message("请先选择端口号！")
+                    self.log_message("串口未连接")
                     continue
-                self.mode_run = ModeRun(motor_id, port)
+                self.serial = SerialConnect(port)
+                self.log_message(f"串口{port}已经连接")
+            
+            elif event == '初始化电机':
+                motor_id = int(values['-ID-'])
+                if not self.serial:
+                    self.log_message("串口未连接")
+                    continue
+                self.mode_run = ModeRun(motor_id, self.serial)
                 self.connect_status = True
                 self.log_message(f"port:{port}连接成功，电机初始化成功！")
             
@@ -232,7 +246,7 @@ class MotorControlApp:
             elif event == '停止当前模式':
                 if self.mode_run:
                     self.mode_run.jog_stop()
-                    self.mode_run.stop_motion()
+                    self.mode_run.disable_motor()
                     self.log_message("电机已停止")
 
             # 持续更新电机动画
