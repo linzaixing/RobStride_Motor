@@ -272,16 +272,20 @@ class Robot():
     '''解析关节位置速度'''
     def ParseFeedbackFata(self, positions, velocities):
         if self.find_zeropoints_flag:
+            rt_pos_list = []
+            rt_velocitys_list = []
             self.rd_buffer.add_batch_data(positions, velocities)
             for i in range(self.joint_nums):
                 earliest_data = self.rd_buffer.pop_earliest_data(i)
                 if earliest_data is not None:
                     position, velocity = earliest_data
                     rt_pos, rt_velocitys= self.SetRunJoint(motor_id=i+1, speed=velocity, pos=position)
-                    return rt_pos, rt_velocitys
+                    rt_pos_list.append(rt_pos)
+                    rt_velocitys_list.append(rt_velocitys)
                 else:
                     print(f'关机{i+1}无缓存数据')
                     return None, None
+            return rt_pos_list, rt_velocitys_list
         else:
             print("请先按'i'初始化机械臂位姿")
             return None, None
