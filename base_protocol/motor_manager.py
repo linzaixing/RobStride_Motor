@@ -291,27 +291,24 @@ class ModeRun():
     def _scale_value(self, value, in_min, in_max, out_min, out_max):
         """线性映射值的范围"""
         return (value - in_min) * (out_max - out_min) / (in_max - in_min) + out_min
-    
-    def test_communication(self):
-        """
-        测试串口通信是否正常。
-        """
-        try:
-            # 发送测试消息
-            test_message = [0x41, 0x54, 0x90, 0x07, 0xE8, 0x0C, 0x08, 0x05, 0x70, 0x00, 0x00, 0x07, 0x01, 0x95, 0x54, 0x0D, 0x0A]
-            response = self.send_and_receive_signal(data1=test_message)
-            
-            if response is not None:
-                print("Serial communication test successful")
-                return True
-            else:
-                print("Serial communication test failed")
-                return False
-        except Exception as e:
-            print(f"Serial communication test error: {str(e)}")
-            return False
+
+    def receiveSignal_mode24(self, motor_id):
+        # 接收电机主动上报的数据
+        data = self.Serial.Read(timeout = 10)
+        result = self.protocol.parse_frame(data)
+        if not result:
+            # print('接收帧为空')
+            return None, None
+        
+        if result['mode'] == 0x18 and result['motor_id'] == motor_id:  # 反馈模式
+            signal = self.data_parsing_from_8byte(result['payload'])
+        else:
+            signal = None
+        
+        return result, signal
     
     def send_and_receive_signal(self, motor_id):
+        # 单发单接反馈帧
         # self.Serial.ClearCanData()
         frame = self.protocol.create_motor_write_frame( 
             motor_id,

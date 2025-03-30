@@ -236,15 +236,20 @@ class Robot():
     def CreateRobotReport(self):
         self.motorJ[0].Serial.ClearCanData()
         for i in range(self.joint_nums):
-            # reset电机
-            frame = self.motorJ[i].protocol.create_motor_reset_frame(i+1)
-            self.motorJ[i].send_data(frame)
-            
-            # frame = self.motorJ[i].protocol.create_motor_report_frame(i+1, True)
+            # # reset电机
+            # frame = self.motorJ[i].protocol.create_motor_reset_frame(i+1)
             # self.motorJ[i].send_data(frame)
+            
+            frame = self.motorJ[i].protocol.create_motor_report_frame(i+1, True)
+            self.motorJ[i].send_data(frame)
             # self.tmp_motor_report(i+1)
         self.report_flag = True
         print(f'机械臂关节主动上报位置信息，可以开始接收')
+    
+    def stopReceiveReport(self):
+        for i in range(self.joint_nums):
+            frame = self.motorJ[i].protocol.create_motor_report_frame(i+1, False)
+            self.motorJ[i].send_data(frame)
     
     '''各关节回零位'''
     def Homing(self, motor_id: int, speed = 1):
@@ -318,7 +323,8 @@ class Robot():
         停止接收报文的线程
         """
         if hasattr(self, 'report_thread') and self.report_thread.is_alive():
-            self.tmp_motor_stop()
+            # self.tmp_motor_stop()
+            self.stopReceiveReport()
             self.stop_report_thread = True
             self.report_flag = False
             self.report_thread.join()
@@ -332,7 +338,7 @@ class Robot():
             if self.report_flag:
                 try:
                     for i in range(self.joint_nums):
-                        result, signal = self.motorJ[i].send_and_receive_signal(i+1)
+                        result, signal = self.motorJ[i].receiveSignal_mode24(i+1)
                         if signal:
                             print(f"Joint {result['motor_id']}, mode {result['mode']}, "
                                     f"Report: Position={signal['current_position']:>7.3f}, "
@@ -340,7 +346,8 @@ class Robot():
                                     f"Torque={signal['current_torque']:>7.3f}, "
                                     f"Temperature={signal['current_temperature']:>7.3f}")
                         else:
-                            print("receive none")
+                            pass
+                            # print("receive none")
                 except Exception as e:
                     print(f"接收数据时发生错误: {str(e)}")
                     # 可以选择记录日志或采取其他恢复措施

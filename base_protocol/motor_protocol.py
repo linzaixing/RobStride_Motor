@@ -173,8 +173,11 @@ class CyberGearProtocol:
         # 命令模式为0x18
         mode = 0x18
         # 主ID放在bit23-8，数据区Byte0为开关，其余补零
-        print(f'电机{motor_id}主动上报')
-        payload = bytearray([0x01 if enable_report else 0x00] + [0x00]*7)
+        if enable_report:
+            print(f'电机{motor_id}主动上报')
+        else:
+            print(f'电机{motor_id}结束上报')
+        payload = bytearray([0x01] + [0x02] + [0x03] + [0x04] + [0x05] + [0x06] + [0x01 if enable_report else 0x00])
         return self.create_frame(24, motor_id, 0, self.master_id, payload)
 
     def float_to_uint(self, x, x_min, x_max, bits):
