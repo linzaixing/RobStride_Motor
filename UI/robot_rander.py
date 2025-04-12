@@ -113,11 +113,6 @@ class BulletWidget(QWidget):
             basePosition=[self.base_pos[0] + axis_length + arrow_length/2, self.base_pos[1], self.base_pos[2]],
             baseOrientation=p.getQuaternionFromEuler([0, np.pi/2, 0])
         )
-        # 添加X标签
-        p.addUserDebugText("X", 
-                          [self.base_pos[0] + axis_length + arrow_length, self.base_pos[1], self.base_pos[2]],
-                          textColorRGB=[1, 0, 0],
-                          textSize=1.2)
         
         # Y轴（绿色）
         y_axis = p.createVisualShape(
@@ -142,11 +137,6 @@ class BulletWidget(QWidget):
             basePosition=[self.base_pos[0], self.base_pos[1] + axis_length + arrow_length/2, self.base_pos[2]],
             baseOrientation=p.getQuaternionFromEuler([np.pi/2, 0, 0])
         )
-        # 添加Y标签
-        p.addUserDebugText("Y", 
-                          [self.base_pos[0], self.base_pos[1] + axis_length + arrow_length, self.base_pos[2]],
-                          textColorRGB=[0, 1, 0],
-                          textSize=1.2)
         
         # Z轴（蓝色）
         z_axis = p.createVisualShape(
@@ -170,11 +160,6 @@ class BulletWidget(QWidget):
             basePosition=[self.base_pos[0], self.base_pos[1], self.base_pos[2] + axis_length + arrow_length/2],
             baseOrientation=p.getQuaternionFromEuler([0, 0, np.pi/2])
         )
-        # 添加Z标签
-        p.addUserDebugText("Z", 
-                          [self.base_pos[0], self.base_pos[1], self.base_pos[2] + axis_length + arrow_length/2],
-                          textColorRGB=[0, 0, 1],
-                          textSize=1.2)
         
         # 记录标签的3D位置（去掉箭头长度部分）
         self.axis_labels['X']['pos3d'] = [self.base_pos[0] + axis_length, self.base_pos[1], self.base_pos[2]]

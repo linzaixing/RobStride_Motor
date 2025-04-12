@@ -29,7 +29,7 @@ class WidgetApp(QWidget, Ui_MainWidget):
 
         super(WidgetApp, self).__init__()
         self.setupUi(self)
-        self.setWindowIcon(QIcon(':/favicon.ico'))
+        self.setWindowIcon(QIcon(r'./icons/DeepArm.ico'))
 
         self.init_com()
         window = RobotWindow()

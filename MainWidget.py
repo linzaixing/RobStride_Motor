@@ -630,7 +630,7 @@ class Ui_MainWidget(object):
 
     def retranslateUi(self, MainWidget):
         _translate = QtCore.QCoreApplication.translate
-        MainWidget.setWindowTitle(_translate("MainWidget", "工具"))
+        MainWidget.setWindowTitle(_translate("MainWidget", "DeepArm机械臂上位机"))
         self.btn_connect.setText(_translate("MainWidget", "连接设备"))
         self.btn_disconnect.setText(_translate("MainWidget", "断开链接"))
         self.btn_stop.setText(_translate("MainWidget", "急停"))
