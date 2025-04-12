@@ -3,7 +3,8 @@ import numpy as np
 import pybullet as p
 import pybullet_data
 from PyQt5.QtCore import Qt, QTimer
-from PyQt5.QtGui import QImage, QPixmap
+from PyQt5.QtGui import QImage, QPixmap, QPainter, QColor, QFont
+
 from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QWidget,
     QVBoxLayout, QHBoxLayout, QSlider,
@@ -24,6 +25,13 @@ class BulletWidget(QWidget):
         layout.setContentsMargins(0, 0, 0, 0)
         layout.addWidget(self.label)
         self.setLayout(layout)
+        
+        # 新增文字标签缓存
+        self.axis_labels = {
+            'X': {'pos3d': None, 'color': (0, 0, 255)},
+            'Y': {'pos3d': None, 'color': (0, 255, 0)},
+            'Z': {'pos3d': None, 'color': (255, 0, 0)}
+        }
 
         # PyBullet初始化
         self.physicsClient = p.connect(p.DIRECT)
@@ -36,20 +44,33 @@ class BulletWidget(QWidget):
         try:
             self.robotId = p.loadURDF(r".\docs\arm_07_urdf\urdf\arm_07_urdf.urdf", [0, 0, 0], useFixedBase=1)
             self.num_joints = p.getNumJoints(self.robotId)
-            # 手动设置颜色
-            for i in range(self.num_joints):
-                # 获取链接信息
-                link_info = p.getVisualShapeData(self.robotId, i)
-                
-                # 设置颜色 (RGBA格式)
-                p.changeVisualShape(self.robotId, i, rgbaColor=[0.792, 0.820, 0.933, 1])  # 示例颜色
+            # 获取基座位置和方向
+            self.base_pos, self.base_ori = p.getBasePositionAndOrientation(self.robotId)
+            self.create_coordinate_axes()
+
+            # 定义不同关节的颜色
+            colors = [
+                [0.5, 0.5, 0.5, 1.0],   # 灰色
+                [1.0, 1.0, 1.0, 1.0],  # 白色
+                [0.5, 0.5, 0.5, 1.0],   # 灰色
+                [1.0, 1.0, 1.0, 1.0],  # 白色
+                [0.5, 0.5, 0.5, 1.0],   # 灰色
+                [1.0, 1.0, 1.0, 1.0],  # 白色
+                [0.5, 0.5, 0.5, 1.0]   # 灰色
+            ]
+            
+            # 为每个关节设置不同颜色
+            for i in range(-1, self.num_joints):  # 从-1开始，包括基座
+                color_index = (i + 1) % len(colors)  # 循环使用颜色列表
+                p.changeVisualShape(self.robotId, i, 
+                                    rgbaColor=colors[color_index])
 
         except:
             raise ValueError("无法加载URDF文件，请检查路径是否正确")
 
         # 相机参数初始化
         self.camera_distance = 2.0
-        self.camera_yaw = 15
+        self.camera_yaw = 35
         self.camera_pitch = -30
         self.camera_target = np.array([-0.1, 0.2, 0.0])
 
@@ -61,56 +82,194 @@ class BulletWidget(QWidget):
         # 鼠标参数
         self.last_mouse_pos = None
         self.mouse_sensitivity = 0.2
+        
+    def create_coordinate_axes(self):
+        """创建固定在地面的坐标轴系统"""
+        axis_length = 0.5
+        axis_radius = 0.01
+        arrow_length = 0.001
+        arrow_radius = 0.02
+        
+        # X轴（红色）
+        x_axis = p.createVisualShape(
+            p.GEOM_CYLINDER,
+            radius=axis_radius,
+            length=axis_length,
+            rgbaColor=[1, 0, 0, 1]
+        )
+        x_arrow = p.createVisualShape(
+            p.GEOM_CAPSULE,
+            radius=arrow_radius,
+            length=arrow_length,
+            rgbaColor=[1, 0, 0, 1]
+        )
+        p.createMultiBody(
+            baseVisualShapeIndex=x_axis,
+            basePosition=[self.base_pos[0] + axis_length/2, self.base_pos[1], self.base_pos[2]],
+            baseOrientation=p.getQuaternionFromEuler([0, np.pi/2, 0])
+        )
+        p.createMultiBody(
+            baseVisualShapeIndex=x_arrow,
+            basePosition=[self.base_pos[0] + axis_length + arrow_length/2, self.base_pos[1], self.base_pos[2]],
+            baseOrientation=p.getQuaternionFromEuler([0, np.pi/2, 0])
+        )
+        # 添加X标签
+        p.addUserDebugText("X", 
+                          [self.base_pos[0] + axis_length + arrow_length, self.base_pos[1], self.base_pos[2]],
+                          textColorRGB=[1, 0, 0],
+                          textSize=1.2)
+        
+        # Y轴（绿色）
+        y_axis = p.createVisualShape(
+            p.GEOM_CYLINDER,
+            radius=axis_radius,
+            length=axis_length,
+            rgbaColor=[0, 1, 0, 1]
+        )
+        y_arrow = p.createVisualShape(
+            p.GEOM_CAPSULE,
+            radius=arrow_radius,
+            length=arrow_length,
+            rgbaColor=[0, 1, 0, 1]
+        )
+        p.createMultiBody(
+            baseVisualShapeIndex=y_axis,
+            basePosition=[self.base_pos[0], self.base_pos[1] + axis_length/2, self.base_pos[2]],
+            baseOrientation=p.getQuaternionFromEuler([np.pi/2, 0, 0])
+        )
+        p.createMultiBody(
+            baseVisualShapeIndex=y_arrow,
+            basePosition=[self.base_pos[0], self.base_pos[1] + axis_length + arrow_length/2, self.base_pos[2]],
+            baseOrientation=p.getQuaternionFromEuler([np.pi/2, 0, 0])
+        )
+        # 添加Y标签
+        p.addUserDebugText("Y", 
+                          [self.base_pos[0], self.base_pos[1] + axis_length + arrow_length, self.base_pos[2]],
+                          textColorRGB=[0, 1, 0],
+                          textSize=1.2)
+        
+        # Z轴（蓝色）
+        z_axis = p.createVisualShape(
+            p.GEOM_CYLINDER,
+            radius=axis_radius,
+            length=axis_length,
+            rgbaColor=[0, 0, 1, 1]
+        )
+        z_arrow = p.createVisualShape(
+            p.GEOM_CAPSULE,
+            radius=arrow_radius,
+            length=arrow_length,
+            rgbaColor=[0, 0, 1, 1]
+        )
+        p.createMultiBody(
+            baseVisualShapeIndex=z_axis,
+            basePosition=[self.base_pos[0], self.base_pos[1], self.base_pos[2] + axis_length/2]
+        )
+        p.createMultiBody(
+            baseVisualShapeIndex=z_arrow,
+            basePosition=[self.base_pos[0], self.base_pos[1], self.base_pos[2] + axis_length + arrow_length/2],
+            baseOrientation=p.getQuaternionFromEuler([0, 0, np.pi/2])
+        )
+        # 添加Z标签
+        p.addUserDebugText("Z", 
+                          [self.base_pos[0], self.base_pos[1], self.base_pos[2] + axis_length + arrow_length/2],
+                          textColorRGB=[0, 0, 1],
+                          textSize=1.2)
+        
+        # 记录标签的3D位置（去掉箭头长度部分）
+        self.axis_labels['X']['pos3d'] = [self.base_pos[0] + axis_length, self.base_pos[1], self.base_pos[2]]
+        self.axis_labels['Y']['pos3d'] = [self.base_pos[0], self.base_pos[1] + axis_length, self.base_pos[2]]
+        self.axis_labels['Z']['pos3d'] = [self.base_pos[0], self.base_pos[1], self.base_pos[2] + axis_length]
 
     def update_frame(self):
         # 物理仿真步进
-        p.stepSimulation()  # 关键修复：添加物理更新
+        p.stepSimulation()
 
-        # 获取渲染尺寸
         width = self.width()
         height = self.height()
 
-        # 计算视图矩阵
+        # 获取并重塑视图矩阵（列主序）
         view_matrix = p.computeViewMatrixFromYawPitchRoll(
             self.camera_target,
             self.camera_distance,
             self.camera_yaw,
             self.camera_pitch,
-            0,
-            2
+            0, 2
         )
+        view_matrix = np.array(view_matrix).reshape(4, 4).T
 
-        # 计算投影矩阵
+        # 获取并重塑投影矩阵（列主序）
         proj_matrix = p.computeProjectionMatrixFOV(
             fov=30,
             aspect=width/height,
             nearVal=0.1,
             farVal=100
         )
+        proj_matrix = np.array(proj_matrix).reshape(4, 4).T
 
-        # 获取相机图像（修复图像方向）
-        _, _, rgb, depth, seg = p.getCameraImage(
+        # 获取相机图像
+        _, _, rgb, _, _ = p.getCameraImage(
             width=width,
             height=height,
-            viewMatrix=view_matrix,
-            projectionMatrix=proj_matrix,
+            viewMatrix=view_matrix.flatten('F').tolist(),  # 保持列主序
+            projectionMatrix=proj_matrix.flatten('F').tolist(),
             renderer=p.ER_BULLET_HARDWARE_OPENGL
         )
 
-        # 转换图像格式（关键修复：处理BGR到RGB的转换）
+        # 转换图像格式
         rgb = np.reshape(rgb, (height, width, 4))[:, :, :3]
         rgb = np.ascontiguousarray(rgb[..., ::-1])  # BGR -> RGB
 
-        # 创建QImage并显示
+        # 创建QImage
         q_img = QImage(
             rgb.data,
             width,
             height,
-            3 * width,  # bytesPerLine
             QImage.Format_RGB888
         )
-        self.label.setPixmap(QPixmap.fromImage(q_img))
 
+        self.addText(q_img, view_matrix, proj_matrix, width, height)
+        self.label.setPixmap(QPixmap.fromImage(q_img))
+        
+    def addText(self, q_img, view_matrix, proj_matrix, width, height):
+        # 创建QPainter绘制文字
+        painter = QPainter(q_img)
+        painter.setRenderHint(QPainter.Antialiasing)
+        font = QFont("Arial", 28, QFont.Bold)
+        painter.setFont(font)
+
+        for label, data in self.axis_labels.items():
+            pos3d = data['pos3d']
+            # 转换为齐次坐标（列向量）
+            pos3d_homogeneous = np.array([pos3d[0], pos3d[1], pos3d[2], 1.0]).reshape(4, 1)
+
+            # 视图变换
+            view_space = np.dot(view_matrix, pos3d_homogeneous)
+            
+            # 投影变换
+            clip_space = np.dot(proj_matrix, view_space)
+            
+            # 透视除法
+            if clip_space[3] == 0:
+                continue
+            ndc = clip_space[:3] / clip_space[3]
+
+            # 转换为屏幕坐标
+            x = int((ndc[0] + 1) * width / 2)
+            y = int((1 - ndc[1]) * height / 2)
+
+            # 安全限制
+            x = np.clip(x, 0, width-1)
+            y = np.clip(y, 0, height-1)
+
+            # 绘制文字
+            painter.setPen(QColor(0, 0, 0, 128))
+            painter.drawText(x + 2, y + 2, label)
+            painter.setPen(QColor(*data['color']))
+            painter.drawText(x, y, label)
+
+        painter.end()
+        
     def mousePressEvent(self, event):
         self.last_mouse_pos = event.pos()
 
@@ -203,6 +362,15 @@ class RobotWindow(QWidget):
         )
 
     def reset_joints(self):
+        # 重置相机参数初始化
+        self.bullet_widget.camera_distance = 2.0
+        self.bullet_widget.camera_yaw = 35
+        self.bullet_widget.camera_pitch = -30
+        self.bullet_widget.camera_target = np.array([-0.1, 0.2, 0.0])
+        # 计算视图矩阵
+        self.bullet_widget.update_frame()
+        
+        # 关节复位
         for slider in self.joint_sliders:
             slider.setValue(0)
 
