@@ -219,7 +219,7 @@ class WidgetApp(QWidget, Ui_MainWidget):
             self.log_message("电机已停止")
 
     def on_instructions_clicked(self):
-        self.pdfView = PDFViewer('./docs/test2.pdf')
+        self.pdfView = PDFViewer('./docs/产品资料/RS00/RS00使用说明书250227.pdf')
         self.pdfView.show()
 
 if __name__ == "__main__":

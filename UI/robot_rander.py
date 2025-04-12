@@ -13,7 +13,7 @@ from PyQt5.QtWidgets import (
 class BulletWidget(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setMinimumSize(640, 480)
+        self.setMinimumSize(1280, 960)
 
         # 初始化UI布局
         self.label = QLabel(self)
@@ -28,28 +28,39 @@ class BulletWidget(QWidget):
         # PyBullet初始化
         self.physicsClient = p.connect(p.DIRECT)
         p.setAdditionalSearchPath(pybullet_data.getDataPath())
-        self.planeId = p.loadURDF(r".\urdf\plane.urdf")
+        print(pybullet_data.getDataPath())
+        self.planeId = p.loadURDF(r".\docs\arm_07_urdf\urdf\plane.urdf")
+        p.setGravity(0, 0, -9.81)  # 添加重力设置
 
         # 加载机械臂模型（添加错误检查）
         try:
-            self.robotId = p.loadURDF(r".\urdf\model.urdf", [0, 0, 0], useFixedBase=1)
+            self.robotId = p.loadURDF(r".\docs\arm_07_urdf\urdf\arm_07_urdf.urdf", [0, 0, 0], useFixedBase=1)
+            self.num_joints = p.getNumJoints(self.robotId)
+            # 手动设置颜色
+            for i in range(self.num_joints):
+                # 获取链接信息
+                link_info = p.getVisualShapeData(self.robotId, i)
+                
+                # 设置颜色 (RGBA格式)
+                p.changeVisualShape(self.robotId, i, rgbaColor=[0.792, 0.820, 0.933, 1])  # 示例颜色
+
         except:
             raise ValueError("无法加载URDF文件，请检查路径是否正确")
 
         # 相机参数初始化
-        self.camera_distance = 2.5
-        self.camera_yaw = 45
+        self.camera_distance = 2.0
+        self.camera_yaw = 15
         self.camera_pitch = -30
-        self.camera_target = np.array([0.0, 0.0, 0.5])
+        self.camera_target = np.array([-0.1, 0.2, 0.0])
 
         # 定时器设置
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.update_frame)
-        self.timer.start(33)  # 30 FPS
+        self.timer.start(30)  # 30 FPS
 
         # 鼠标参数
         self.last_mouse_pos = None
-        self.mouse_sensitivity = 0.5
+        self.mouse_sensitivity = 0.2
 
     def update_frame(self):
         # 物理仿真步进
@@ -71,7 +82,7 @@ class BulletWidget(QWidget):
 
         # 计算投影矩阵
         proj_matrix = p.computeProjectionMatrixFOV(
-            fov=60,
+            fov=30,
             aspect=width/height,
             nearVal=0.1,
             farVal=100
@@ -122,8 +133,8 @@ class BulletWidget(QWidget):
                 up = np.array([0, 0, 1])
                 forward = np.cross(right, up)
 
-                self.camera_target += right * dx * 0.01
-                self.camera_target += forward * dy * 0.01
+                self.camera_target -= right * dx * 0.01
+                self.camera_target -= forward * dy * 0.01
 
             self.last_mouse_pos = event.pos()
 
@@ -137,7 +148,7 @@ class RobotWindow(QWidget):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("机械臂控制平台")
-        self.setGeometry(100, 100, 1280, 720)
+        self.setGeometry(100, 100, 1920, 1080)
 
         # 主布局
         central_widget = QWidget()
@@ -157,11 +168,12 @@ class RobotWindow(QWidget):
 
         # 关节控制滑块
         self.joint_sliders = []
-        for i in range(7):
+        for i in range(self.bullet_widget.num_joints):
             slider = QSlider(Qt.Vertical)
             slider.setRange(-180, 180)
             slider.setValue(0)
             slider.setPageStep(5)
+            slider.setFixedHeight(100)  # 设置滑动条高度
             slider.valueChanged.connect(
                 lambda value, idx=i: self.set_joint_angle(idx, value)
             )
@@ -184,6 +196,9 @@ class RobotWindow(QWidget):
             joint_idx,
             p.POSITION_CONTROL,
             targetPosition=np.deg2rad(angle),
+            targetVelocity=0,  # 目标速度
+            positionGain=0.5,  # 位置增益
+            velocityGain=1.0,  # 速度增益
             force=500
         )
 

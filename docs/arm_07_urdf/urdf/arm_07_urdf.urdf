@@ -1,0 +1,395 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- This URDF was automatically created by SolidWorks to URDF Exporter! Originally created by Stephen Brawner (brawner@gmail.com) 
+     Commit Version: 1.6.0-4-g7f85cfe  Build Version: 1.6.7995.38578
+     For more information, please see http://wiki.ros.org/sw_urdf_exporter -->
+<robot
+  name="arm_07_urdf">
+  <link
+    name="base_link">
+    <inertial>
+      <origin
+        xyz="9.79807349309969E-05 3.17552736894338E-06 0.0154126161882423"
+        rpy="0 0 0" />
+      <mass
+        value="0.312449700451943" />
+      <inertia
+        ixx="0.000930695850162467"
+        ixy="-7.67872291471216E-08"
+        ixz="3.91688763405863E-07"
+        iyy="0.000444895288468995"
+        iyz="1.34096347341056E-07"
+        izz="0.00127687976071196" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://arm_07_urdf/meshes/base_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0 0.941176470588235 0.988235294117647 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://arm_07_urdf/meshes/base_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <link
+    name="arm_B_Link">
+    <inertial>
+      <origin
+        xyz="0.00211375802851201 -1.46611349662278E-05 0.128545913891624"
+        rpy="0 0 0" />
+      <mass
+        value="0.161927400239937" />
+      <inertia
+        ixx="0.000358887566381327"
+        ixy="2.6822388652807E-08"
+        ixz="-1.85398446013315E-05"
+        iyy="0.000230288747292943"
+        iyz="3.29798306143151E-09"
+        izz="0.000176984565119134" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://arm_07_urdf/meshes/arm_B_Link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://arm_07_urdf/meshes/arm_B_Link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="arm_B_joint"
+    type="revolute">
+    <origin
+      xyz="0 0 0"
+      rpy="0 0 1.5707963267949" />
+    <parent
+      link="base_link" />
+    <child
+      link="arm_B_Link" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      lower="-2.792528"
+      upper="2.7928"
+      effort="0"
+      velocity="0" />
+  </joint>
+  <link
+    name="arm_c_Link">
+    <inertial>
+      <origin
+        xyz="0.0009191573539574 0.121589064514994 -0.0254313597765101"
+        rpy="0 0 0" />
+      <mass
+        value="0.257068371325535" />
+      <inertia
+        ixx="0.00334031831601275"
+        ixy="1.37029910970322E-05"
+        ixz="-3.21872551222272E-06"
+        iyy="0.000263467511957956"
+        iyz="0.000513889597277906"
+        izz="0.00314132138371385" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://arm_07_urdf/meshes/arm_c_Link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0 0.941176470588235 0.988235294117647 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://arm_07_urdf/meshes/arm_c_Link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="arm_c_joint"
+    type="revolute">
+    <origin
+      xyz="0 0 0.143265371804359"
+      rpy="0 0 0" />
+    <parent
+      link="arm_B_Link" />
+    <child
+      link="arm_c_Link" />
+    <axis
+      xyz="1 0 0" />
+    <limit
+      lower="0"
+      upper="3.665193"
+      effort="0"
+      velocity="0" />
+  </joint>
+  <link
+    name="arm_d_Link">
+    <inertial>
+      <origin
+        xyz="0.00105930272863335 -0.0921421503703848 0.0614993051227474"
+        rpy="0 0 0" />
+      <mass
+        value="0.131982022478848" />
+      <inertia
+        ixx="0.000934143197413629"
+        ixy="-3.66276598129619E-06"
+        ixz="2.55399404517292E-06"
+        iyy="0.000181449410808082"
+        iyz="0.000298251790948272"
+        izz="0.00077306684761962" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://arm_07_urdf/meshes/arm_d_Link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0 0.941176470588235 0.988235294117647 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://arm_07_urdf/meshes/arm_d_Link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="arm_d_joint"
+    type="revolute">
+    <origin
+      xyz="0 0.27951789793953 -0.0386619287085886"
+      rpy="0 0 0" />
+    <parent
+      link="arm_c_Link" />
+    <child
+      link="arm_d_Link" />
+    <axis
+      xyz="1 0 0" />
+    <limit
+      lower="-3.0717808"
+      upper="0"
+      effort="0"
+      velocity="0" />
+  </joint>
+  <link
+    name="arm_e_Link">
+    <inertial>
+      <origin
+        xyz="-0.00248300427056015 -0.0243008893592645 0.00812623111704036"
+        rpy="0 0 0" />
+      <mass
+        value="0.0744667414885224" />
+      <inertia
+        ixx="3.2782750199348E-05"
+        ixy="-1.19160537884968E-07"
+        ixz="1.37153164466685E-07"
+        iyy="2.41495498456555E-05"
+        iyz="-1.56987083759171E-06"
+        izz="1.98270124929055E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://arm_07_urdf/meshes/arm_e_Link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.298039215686275 0.298039215686275 0.298039215686275 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://arm_07_urdf/meshes/arm_e_Link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="arm_e_joint"
+    type="revolute">
+    <origin
+      xyz="-0.000200000000001055 -0.225997477754371 0.110232209669692"
+      rpy="0 0 0" />
+    <parent
+      link="arm_d_Link" />
+    <child
+      link="arm_e_Link" />
+    <axis
+      xyz="0 -0.951056516295154 0.309016994374946" />
+    <limit
+      lower="-2.618"
+      upper="2.618"
+      effort="0"
+      velocity="0" />
+  </joint>
+  <link
+    name="arm_f_Link">
+    <inertial>
+      <origin
+        xyz="0.00541769042656354 -0.0494689878592178 0.0158660314076358"
+        rpy="0 0 0" />
+      <mass
+        value="0.0818556966681358" />
+      <inertia
+        ixx="2.68719350250462E-05"
+        ixy="-4.66421828801022E-07"
+        ixz="1.80944351018695E-07"
+        iyy="3.439330933507E-05"
+        iyz="-3.80420131854268E-06"
+        izz="2.36039237600477E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://arm_07_urdf/meshes/arm_f_Link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.298039215686275 0.298039215686275 0.298039215686275 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://arm_07_urdf/meshes/arm_f_Link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="arm_f_joint"
+    type="revolute">
+    <origin
+      xyz="0 -0.034238034586623 0.0111246117974971"
+      rpy="0 0 0" />
+    <parent
+      link="arm_e_Link" />
+    <child
+      link="arm_f_Link" />
+    <axis
+      xyz="1 0 0" />
+    <limit
+      lower="-1.5708"
+      upper="1.5708"
+      effort="0"
+      velocity="0" />
+  </joint>
+  <link
+    name="arm_g_Link">
+    <inertial>
+      <origin
+        xyz="1.87214540411213E-06 -0.146862092049971 0.0477183863370055"
+        rpy="0 0 0" />
+      <mass
+        value="0.201928885842249" />
+      <inertia
+        ixx="0.000178867317174843"
+        ixy="1.69183049816098E-08"
+        ixz="-5.49709051536351E-09"
+        iyy="0.000202826883908908"
+        iyz="3.33342629014081E-05"
+        izz="0.000294588237488371" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://arm_07_urdf/meshes/arm_g_Link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://arm_07_urdf/meshes/arm_g_Link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="arm_g_joint"
+    type="revolute">
+    <origin
+      xyz="0 0.0147562073660819 -0.00479458241493827"
+      rpy="0 0 0" />
+    <parent
+      link="arm_f_Link" />
+    <child
+      link="arm_g_Link" />
+    <axis
+      xyz="0 -0.951056516295154 0.309016994374945" />
+    <limit
+      lower="-1.570797"
+      upper="1.570797"
+      effort="0"
+      velocity="0" />
+  </joint>
+</robot>
