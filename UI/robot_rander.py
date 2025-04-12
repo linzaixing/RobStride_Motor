@@ -324,27 +324,40 @@ class RobotWindow(QWidget):
         control_panel = QWidget()
         control_layout = QHBoxLayout(control_panel)
         layout.addWidget(control_panel)
+        
+        # 关节控制滑块
+        self.joint_sliders = []
+        slider_row = QHBoxLayout()  # 创建水平布局用于放置滑块
+        control_layout.addLayout(slider_row)
 
         # 关节控制滑块
         self.joint_sliders = []
         for i in range(self.bullet_widget.num_joints):
-            slider = QSlider(Qt.Vertical)
+            slider = QSlider(Qt.Horizontal)
             slider.setRange(-180, 180)
             slider.setValue(0)
             slider.setPageStep(5)
-            slider.setFixedHeight(100)  # 设置滑动条高度
+            slider.setFixedWidth(100)  # 设置滑块宽度
             slider.valueChanged.connect(
                 lambda value, idx=i: self.set_joint_angle(idx, value)
             )
+            
+            # 创建标签并设置字体大小
+            joint_label = QLabel(f"关节 {i+1}:")
+            joint_label.setStyleSheet("font-size: 16px;")  # 设置字体大小为16px
 
-            control_layout.addWidget(QLabel(f"关\n节\n{i+1}"))
-            control_layout.addWidget(slider)
-            control_layout.addSpacing(30)
+            slider_container = QVBoxLayout()  # 每个滑块单独一个垂直布局
+            slider_container.addWidget(joint_label)
+            slider_container.addWidget(slider)
+            slider_row.addLayout(slider_container)
+            slider_row.addSpacing(30)
             self.joint_sliders.append(slider)
 
         # 添加复位按钮
         reset_btn = QPushButton("复位")
-        reset_btn.setFixedWidth(35)
+        reset_btn.setFixedWidth(100)  # 增加按钮宽度
+        reset_btn.setFixedHeight(50)  # 增加按钮高度
+        reset_btn.setStyleSheet("font-size: 20px;")  # 设置字体大小
         reset_btn.clicked.connect(self.reset_joints)
         control_layout.addWidget(reset_btn)
         control_layout.addSpacing(20)
