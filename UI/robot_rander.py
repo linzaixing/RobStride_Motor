@@ -95,13 +95,13 @@ class BulletWidget(QWidget):
             p.GEOM_CYLINDER,
             radius=axis_radius,
             length=axis_length,
-            rgbaColor=[1, 0, 0, 1]
+            rgbaColor=[0, 0, 1, 1]
         )
         x_arrow = p.createVisualShape(
             p.GEOM_CAPSULE,
             radius=arrow_radius,
             length=arrow_length,
-            rgbaColor=[1, 0, 0, 1]
+            rgbaColor=[0, 0, 1, 1]
         )
         p.createMultiBody(
             baseVisualShapeIndex=x_axis,
@@ -143,13 +143,13 @@ class BulletWidget(QWidget):
             p.GEOM_CYLINDER,
             radius=axis_radius,
             length=axis_length,
-            rgbaColor=[0, 0, 1, 1]
+            rgbaColor=[1, 0, 0, 1]
         )
         z_arrow = p.createVisualShape(
             p.GEOM_CAPSULE,
             radius=arrow_radius,
             length=arrow_length,
-            rgbaColor=[0, 0, 1, 1]
+            rgbaColor=[1, 0, 0, 1]
         )
         p.createMultiBody(
             baseVisualShapeIndex=z_axis,
@@ -204,13 +204,13 @@ class BulletWidget(QWidget):
         # 转换图像格式
         rgb = np.reshape(rgb, (height, width, 4))[:, :, :3]
         rgb = np.ascontiguousarray(rgb[..., ::-1])  # BGR -> RGB
-
+        
         # 创建QImage
         q_img = QImage(
             rgb.data,
-            width,
-            height,
-            QImage.Format_RGB888
+            1280,
+            960,
+            QImage.Format_BGR888
         )
 
         self.addText(q_img, view_matrix, proj_matrix, width, height)
@@ -316,7 +316,6 @@ class RobotWindow(QWidget):
         control_layout.addLayout(slider_row)
 
         # 关节控制滑块
-        self.joint_sliders = []
         for i in range(self.bullet_widget.num_joints):
             slider = QSlider(Qt.Horizontal)
             slider.setRange(-180, 180)
@@ -354,8 +353,8 @@ class RobotWindow(QWidget):
             p.POSITION_CONTROL,
             targetPosition=np.deg2rad(angle),
             targetVelocity=0,  # 目标速度
-            positionGain=0.5,  # 位置增益
-            velocityGain=1.0,  # 速度增益
+            # positionGain=0.5,  # 位置增益
+            # velocityGain=1.0,  # 速度增益
             force=500
         )
 
