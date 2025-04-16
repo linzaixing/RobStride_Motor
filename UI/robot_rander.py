@@ -11,6 +11,7 @@ from PyQt5.QtWidgets import (
     QLabel, QPushButton  # 确保包含QPushButton
 )
 import math
+import time
 
 class BulletWidget(QWidget):
     def __init__(self, parent=None):
@@ -38,12 +39,12 @@ class BulletWidget(QWidget):
         self.physicsClient = p.connect(p.DIRECT)
         p.setAdditionalSearchPath(pybullet_data.getDataPath())
         print(pybullet_data.getDataPath())
-        self.planeId = p.loadURDF(r".\docs\arm_07_urdf\urdf\plane.urdf")
+        self.planeId = p.loadURDF(r"..\docs\arm_07_urdf\urdf\plane.urdf")
         p.setGravity(0, 0, -9.81)  # 添加重力设置
 
         # 加载机械臂模型（添加错误检查）
         try:
-            self.robotId = p.loadURDF(r".\docs\arm_07_urdf\urdf\arm_07_urdf.urdf", [0, 0, 0], useFixedBase=1)
+            self.robotId = p.loadURDF(r"..\docs\arm_07_urdf\urdf\arm_07_urdf.urdf", [0, 0, 0], useFixedBase=1)
             self.num_joints = p.getNumJoints(self.robotId)
             # 获取基座位置和方向
             self.base_pos, self.base_ori = p.getBasePositionAndOrientation(self.robotId)
@@ -271,7 +272,7 @@ class BulletWidget(QWidget):
         self.end_effector_link_index = joint_info[16]  # 使用jointInfo的childLinkIndex字段
 
         # 保存初始关节位置
-        initial_joint_positions = [p.getJointState(self.robotId, i)[0] for i in self.controlled_joints]
+        self.initial_joint_positions = [p.getJointState(self.robotId, i)[0] for i in self.controlled_joints]
 
         # 初始化目标位置和姿态（基于当前末端状态）
         link_state = p.getLinkState(self.robotId, self.end_effector_link_index)
@@ -289,9 +290,9 @@ class BulletWidget(QWidget):
         if len(self.target_pos)<3 or len(self.target_rpy)<3:
             print("位置或角度错误")
             return
-        self.target_pos[0] += posX
-        self.target_pos[1] += posY
-        self.target_pos[2] += posZ
+        self.target_pos[0] += (posX / 100)
+        self.target_pos[1] += (posY / 100)
+        self.target_pos[2] += (posZ / 100)
         self.target_rpy[0] += math.radians(angleR)
         self.target_rpy[1] += math.radians(angleP)
         self.target_rpy[2] += math.radians(angleY)
@@ -317,6 +318,10 @@ class BulletWidget(QWidget):
                 targetPosition=joint_angles[i],
                 force=500
             )
+        
+        # 步进仿真
+        p.stepSimulation()
+        time.sleep(1./240.)
 
     def mousePressEvent(self, event):
         self.last_mouse_pos = event.pos()
@@ -433,7 +438,25 @@ class RobotWindow(QWidget):
         # 关节复位
         for slider in self.joint_sliders:
             slider.setValue(0)
+        
+        # 退出时复位关节位置
+        for i, pos in zip(self.bullet_widget.controlled_joints, self.bullet_widget.initial_joint_positions):
+            p.resetJointState(self.bullet_widget.robotId, i, pos)
+            p.setJointMotorControl2(
+                self.bullet_widget.robotId,
+                i,
+                p.POSITION_CONTROL,
+                targetPosition=pos,
+                force=500
+            )
 
+        # 最后步进一次确保复位
+        p.stepSimulation()
+        time.sleep(0.5)
+
+    def setRobotPosAngle(self, posX, posY, posZ, angleR, angleP, angleY):
+        self.bullet_widget.setRobotPosAngle(posX, posY, posZ, angleR, angleP, angleY)
+        
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = RobotWindow()

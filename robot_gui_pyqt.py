@@ -31,8 +31,8 @@ class WidgetApp(QWidget, Ui_MainWidget):
         self.setupUi(self)
         self.setWindowIcon(QIcon(r'./icons/DeepArm.ico'))
         self.init_com()
-        window = RobotWindow()
-        self.verticalLayout_robot.addWidget(window)
+        self.robotwindow = RobotWindow()
+        self.verticalLayout_robot.addWidget(self.robotwindow)
 
         self.btn_config.clicked.connect(self.on_config_clicked)
         self.btn_operate.clicked.connect(self.on_operate_clicked)
@@ -296,7 +296,6 @@ class WidgetApp(QWidget, Ui_MainWidget):
         self.lineEdit_z_angle.setText(str(round(pos1 - pos2, 3)))
 
     def on_send_pos_angle_clicked(self):
-        w = BulletWidget()
         posX = round(float(self.lineEdit_x_pos.text()), 3)
         posY = round(float(self.lineEdit_y_pos.text()), 3)
         posZ = round(float(self.lineEdit_z_pos.text()), 3)
@@ -304,7 +303,7 @@ class WidgetApp(QWidget, Ui_MainWidget):
         angleP = round(float(self.lineEdit_y_angle.text()), 3)
         angleY = round(float(self.lineEdit_z_angle.text()), 3)
         self.label_tips.setText(f"发送的数据：\nX:{posX}, Y:{posY}, Z:{posZ}, \nRx:{angleR}, Ry:{angleP}, Rz:{angleY}")
-        w.setRobotPosAngle(posX, posY, posZ, angleR, angleP, angleY)
+        self.robotwindow.setRobotPosAngle(posX, posY, posZ, angleR, angleP, angleY)
 
 if __name__ == "__main__":
     QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
