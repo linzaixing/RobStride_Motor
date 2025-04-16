@@ -6,7 +6,7 @@ from PyQt5 import QtCore
 import serial.tools.list_ports
 from base_protocol.motor_manager import ModeRun
 from base_protocol.serial_manager import SerialConnect
-from UI.robot_rander import RobotWindow
+from UI.robot_rander import RobotWindow,BulletWidget
 from UI.PDFViewWeb import PDFViewer
 
 #获取串口列表
@@ -30,7 +30,6 @@ class WidgetApp(QWidget, Ui_MainWidget):
         super(WidgetApp, self).__init__()
         self.setupUi(self)
         self.setWindowIcon(QIcon(r'./icons/DeepArm.ico'))
-
         self.init_com()
         window = RobotWindow()
         self.verticalLayout_robot.addWidget(window)
@@ -48,6 +47,20 @@ class WidgetApp(QWidget, Ui_MainWidget):
         self.comboBox_control_model.currentTextChanged.connect(self.on_control_model_currentTextChanged)
         self.btn_stop.clicked.connect(self.on_stop_clicked)
         self.btn_instructions.clicked.connect(self.on_instructions_clicked)
+
+        self.btn_x_pos_add.clicked.connect(self.on_x_pos_add_clicked)
+        self.btn_x_pos_sub.clicked.connect(self.on_x_pos_sub_clicked)
+        self.btn_y_pos_add.clicked.connect(self.on_y_pos_add_clicked)
+        self.btn_y_pos_add.clicked.connect(self.on_y_pos_sub_clicked)
+        self.btn_z_pos_add.clicked.connect(self.on_z_pos_add_clicked)
+        self.btn_z_pos_add.clicked.connect(self.on_z_pos_sub_clicked)
+        self.btn_x_angle_add.clicked.connect(self.on_x_angle_add_clicked)
+        self.btn_x_angle_sub.clicked.connect(self.on_x_angle_sub_clicked)
+        self.btn_y_angle_add.clicked.connect(self.on_y_angle_add_clicked)
+        self.btn_y_angle_sub.clicked.connect(self.on_y_angle_sub_clicked)
+        self.btn_z_angle_add.clicked.connect(self.on_z_angle_add_clicked)
+        self.btn_z_angle_sub.clicked.connect(self.on_z_angle_sub_clicked)
+        self.btn_send_pos_angle.clicked.connect(self.on_send_pos_angle_clicked)
 
         self.on_config_clicked()
 
@@ -222,10 +235,81 @@ class WidgetApp(QWidget, Ui_MainWidget):
         self.pdfView = PDFViewer('./docs/产品资料/RS00/RS00使用说明书250227.pdf')
         self.pdfView.show()
 
+    def on_x_pos_add_clicked(self):
+        pos1 = float(self.lineEdit_x_pos.text())
+        pos2 = float(self.spinBox_x_pos.value())
+        self.lineEdit_x_pos.setText(str(round(pos1 + pos2, 3)))
+
+    def on_x_pos_sub_clicked(self):
+        pos1 = float(self.lineEdit_x_pos.text())
+        pos2 = float(self.spinBox_x_pos.value())
+        self.lineEdit_x_pos.setText(str(round(pos1 - pos2, 3)))
+
+    def on_y_pos_add_clicked(self):
+        pos1 = float(self.lineEdit_y_pos.text())
+        pos2 = float(self.spinBox_y_pos.value())
+        self.lineEdit_y_pos.setText(str(round(pos1 + pos2, 3)))
+
+    def on_y_pos_sub_clicked(self):
+        pos1 = float(self.lineEdit_y_pos.text())
+        pos2 = float(self.spinBox_y_pos.value())
+        self.lineEdit_y_pos.setText(str(round(pos1 - pos2, 3)))
+
+    def on_z_pos_add_clicked(self):
+        pos1 = float(self.lineEdit_z_pos.text())
+        pos2 = float(self.spinBox_z_pos.value())
+        self.lineEdit_z_pos.setText(str(round(pos1 + pos2, 3)))
+
+    def on_z_pos_sub_clicked(self):
+        pos1 = float(self.lineEdit_z_pos.text())
+        pos2 = float(self.spinBox_z_pos.value())
+        self.lineEdit_z_pos.setText(str(round(pos1 - pos2, 3)))
+
+    def on_x_angle_add_clicked(self):
+        pos1 = float(self.lineEdit_x_angle.text())
+        pos2 = float(self.spinBox_x_angle.value())
+        self.lineEdit_x_angle.setText(str(round(pos1 + pos2, 3)))
+
+    def on_x_angle_sub_clicked(self):
+        pos1 = float(self.lineEdit_y_angle.text())
+        pos2 = float(self.spinBox_y_angle.value())
+        self.lineEdit_y_angle.setText(str(round(pos1 - pos2, 3)))
+
+    def on_y_angle_add_clicked(self):
+        pos1 = float(self.lineEdit_y_angle.text())
+        pos2 = float(self.spinBox_y_angle.value())
+        self.lineEdit_y_angle.setText(str(round(pos1 + pos2, 3)))
+
+    def on_y_angle_sub_clicked(self):
+        pos1 = float(self.lineEdit_y_angle.text())
+        pos2 = float(self.spinBox_y_angle.value())
+        self.lineEdit_y_angle.setText(str(round(pos1 - pos2, 3)))
+
+    def on_z_angle_add_clicked(self):
+        pos1 = float(self.lineEdit_z_angle.text())
+        pos2 = float(self.spinBox_z_angle.value())
+        self.lineEdit_z_angle.setText(str(round(pos1 + pos2, 3)))
+
+    def on_z_angle_sub_clicked(self):
+        pos1 = float(self.lineEdit_z_angle.text())
+        pos2 = float(self.spinBox_z_angle.value())
+        self.lineEdit_z_angle.setText(str(round(pos1 - pos2, 3)))
+
+    def on_send_pos_angle_clicked(self):
+        w = BulletWidget()
+        posX = round(float(self.lineEdit_x_pos.text()), 3)
+        posY = round(float(self.lineEdit_y_pos.text()), 3)
+        posZ = round(float(self.lineEdit_z_pos.text()), 3)
+        angleR = round(float(self.lineEdit_x_angle.text()), 3)
+        angleP = round(float(self.lineEdit_y_angle.text()), 3)
+        angleY = round(float(self.lineEdit_z_angle.text()), 3)
+        self.label_tips.setText(f"发送的数据：\nX:{posX}, Y:{posY}, Z:{posZ}, \nRx:{angleR}, Ry:{angleP}, Rz:{angleY}")
+        w.setRobotPosAngle(posX, posY, posZ, angleR, angleP, angleY)
+
 if __name__ == "__main__":
     QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
     QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)
     app = QApplication(sys.argv)
     mw = WidgetApp()
-    mw.show()
+    mw.showMaximized()
     sys.exit(app.exec_())

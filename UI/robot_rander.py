@@ -10,6 +10,7 @@ from PyQt5.QtWidgets import (
     QVBoxLayout, QHBoxLayout, QSlider,
     QLabel, QPushButton  # 确保包含QPushButton
 )
+import math
 
 class BulletWidget(QWidget):
     def __init__(self, parent=None):
@@ -254,7 +255,69 @@ class BulletWidget(QWidget):
             painter.drawText(x, y, label)
 
         painter.end()
-        
+
+    def getRobotPosAngle(self):
+        # 获取可动关节索引（过滤固定关节）
+        joint_indices = [i for i in range(p.getNumJoints(self.robotId)) if p.getJointInfo(self.robotId, i)[2] != p.JOINT_FIXED]
+        print('joint_indices: ', len(joint_indices))
+        # assert len(joint_indices) >= 6, "机械臂需要至少6个可动关节"
+        if len(joint_indices) < 6:
+            return None
+        self.controlled_joints = joint_indices[:6]  # 取前6个可动关节
+
+        # 获取末端执行器链接索引（最后一个控制关节的子链接）
+        last_joint_index = self.controlled_joints[-1]
+        joint_info = p.getJointInfo(self.robotId, last_joint_index)
+        self.end_effector_link_index = joint_info[16]  # 使用jointInfo的childLinkIndex字段
+
+        # 保存初始关节位置
+        initial_joint_positions = [p.getJointState(self.robotId, i)[0] for i in self.controlled_joints]
+
+        # 初始化目标位置和姿态（基于当前末端状态）
+        link_state = p.getLinkState(self.robotId, self.end_effector_link_index)
+        # assert link_state is not None, "无法获取末端执行器状态，请检查链接索引"
+        if link_state is None:
+            return None
+        current_end_pos, current_end_orn = link_state[:2]
+        self.target_pos = list(current_end_pos)
+        self.target_rpy = list(p.getEulerFromQuaternion(current_end_orn))
+
+    def setRobotPosAngle(self, posX, posY, posZ, angleR, angleP, angleY):
+        self.getRobotPosAngle()
+        # step_size = 0.01  # 1cm
+        # angle_step = math.radians(1)  # 1度转弧度
+        if len(self.target_pos)<3 or len(self.target_rpy)<3:
+            print("位置或角度错误")
+            return
+        self.target_pos[0] += posX
+        self.target_pos[1] += posY
+        self.target_pos[2] += posZ
+        self.target_rpy[0] += math.radians(angleR)
+        self.target_rpy[1] += math.radians(angleP)
+        self.target_rpy[2] += math.radians(angleY)
+        # 计算逆运动学
+        target_quat = p.getQuaternionFromEuler(self.target_rpy)
+        joint_angles = p.calculateInverseKinematics(
+            self.robotId,
+            self.end_effector_link_index,
+            self.target_pos,
+            target_quat,
+            maxNumIterations=100,
+            residualThreshold=1e-5,
+            jointDamping=[0.1] * 6
+            # jointIndices=controlled_joints
+        )
+
+        # 应用关节控制
+        for i, joint_index in enumerate(self.controlled_joints):
+            p.setJointMotorControl2(
+                self.robotId,
+                joint_index,
+                p.POSITION_CONTROL,
+                targetPosition=joint_angles[i],
+                force=500
+            )
+
     def mousePressEvent(self, event):
         self.last_mouse_pos = event.pos()
 
