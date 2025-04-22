@@ -62,6 +62,14 @@ class WidgetApp(QWidget, Ui_MainWidget):
         self.btn_z_angle_sub.clicked.connect(self.on_z_angle_sub_clicked)
         self.btn_send_pos_angle.clicked.connect(self.on_send_pos_angle_clicked)
 
+        # 设置spinBox的范围，允许输入负数
+        self.spinBox_x_pos.setRange(-999999, 999999)
+        self.spinBox_y_pos.setRange(-999999, 999999)
+        self.spinBox_z_pos.setRange(-999999, 999999)
+        self.spinBox_x_angle.setRange(-999999, 999999)
+        self.spinBox_y_angle.setRange(-999999, 999999)
+        self.spinBox_z_angle.setRange(-999999, 999999)
+
         self.on_config_clicked()
 
     def jog_run(self, direction):
@@ -296,12 +304,12 @@ class WidgetApp(QWidget, Ui_MainWidget):
         self.lineEdit_z_angle.setText(str(round(pos1 - pos2, 3)))
 
     def on_send_pos_angle_clicked(self):
-        posX = round(float(self.lineEdit_x_pos.text()), 3)
-        posY = round(float(self.lineEdit_y_pos.text()), 3)
-        posZ = round(float(self.lineEdit_z_pos.text()), 3)
-        angleR = round(float(self.lineEdit_x_angle.text()), 3)
-        angleP = round(float(self.lineEdit_y_angle.text()), 3)
-        angleY = round(float(self.lineEdit_z_angle.text()), 3)
+        posX = round(float(self.spinBox_x_pos.text()), 3)
+        posY = round(float(self.spinBox_y_pos.text()), 3)
+        posZ = round(float(self.spinBox_z_pos.text()), 3)
+        angleR = round(float(self.spinBox_x_angle.text()), 3)
+        angleP = round(float(self.spinBox_y_angle.text()), 3)
+        angleY = round(float(self.spinBox_z_angle.text()), 3)
         self.label_tips.setText(f"发送的数据：\nX:{posX}, Y:{posY}, Z:{posZ}, \nRx:{angleR}, Ry:{angleP}, Rz:{angleY}")
         self.robotwindow.setRobotPosAngle(posX, posY, posZ, angleR, angleP, angleY)
 

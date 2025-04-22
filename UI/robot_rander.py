@@ -5,6 +5,8 @@ import pybullet_data
 from PyQt5.QtCore import Qt, QTimer
 from PyQt5.QtGui import QImage, QPixmap, QPainter, QColor, QFont
 
+# from robot_module.robot_kinamatic import PybulletRobot
+
 from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QWidget,
     QVBoxLayout, QHBoxLayout, QSlider,
@@ -85,6 +87,34 @@ class BulletWidget(QWidget):
         self.last_mouse_pos = None
         self.mouse_sensitivity = 0.2
         
+        self.getRobotPosAngle()
+
+        # 计算逆运动学
+        target_quat = p.getQuaternionFromEuler(self.target_rpy)
+        joint_angles = p.calculateInverseKinematics(
+            self.robotId,
+            self.last_joint_index,
+            self.target_pos,
+            target_quat,
+            maxNumIterations=100,
+            residualThreshold=1e-5,
+            jointDamping=[0.1] * 6
+            # jointIndices=controlled_joints
+        )
+        print('\n move target_pos: ', self.target_pos)
+        print('\n move target_rpy: ', self.target_rpy)
+        print('joint_angles:', joint_angles)
+
+        # 应用关节控制
+        for i, joint_index in enumerate(self.controlled_joints):
+            p.setJointMotorControl2(
+                self.robotId,
+                joint_index,
+                p.POSITION_CONTROL,
+                targetPosition=joint_angles[i],
+                force=500
+            )
+    
     def create_coordinate_axes(self):
         """创建固定在地面的坐标轴系统"""
         axis_length = 0.5
@@ -267,8 +297,8 @@ class BulletWidget(QWidget):
         self.controlled_joints = joint_indices[:6]  # 取前6个可动关节
 
         # 获取末端执行器链接索引（最后一个控制关节的子链接）
-        last_joint_index = self.controlled_joints[-1]
-        joint_info = p.getJointInfo(self.robotId, last_joint_index)
+        self.last_joint_index = self.controlled_joints[-1]
+        joint_info = p.getJointInfo(self.robotId, self.last_joint_index)
         self.end_effector_link_index = joint_info[16]  # 使用jointInfo的childLinkIndex字段
 
         # 保存初始关节位置
@@ -282,12 +312,14 @@ class BulletWidget(QWidget):
         current_end_pos, current_end_orn = link_state[:2]
         self.target_pos = list(current_end_pos)
         self.target_rpy = list(p.getEulerFromQuaternion(current_end_orn))
+        print('\n init target_pos: ', self.target_pos)
+        print('\n init target_rpy: ', self.target_rpy)
+        
 
     def setRobotPosAngle(self, posX, posY, posZ, angleR, angleP, angleY):
-        self.getRobotPosAngle()
         # step_size = 0.01  # 1cm
         # angle_step = math.radians(1)  # 1度转弧度
-        if len(self.target_pos)<3 or len(self.target_rpy)<3:
+        if len(self.target_pos) < 3 or len(self.target_rpy) < 3:
             print("位置或角度错误")
             return
         self.target_pos[0] += (posX / 100)
@@ -296,11 +328,12 @@ class BulletWidget(QWidget):
         self.target_rpy[0] += math.radians(angleR)
         self.target_rpy[1] += math.radians(angleP)
         self.target_rpy[2] += math.radians(angleY)
+        # print(self.end_effector_link_index)
         # 计算逆运动学
         target_quat = p.getQuaternionFromEuler(self.target_rpy)
         joint_angles = p.calculateInverseKinematics(
             self.robotId,
-            self.end_effector_link_index,
+            self.last_joint_index,
             self.target_pos,
             target_quat,
             maxNumIterations=100,
@@ -308,6 +341,9 @@ class BulletWidget(QWidget):
             jointDamping=[0.1] * 6
             # jointIndices=controlled_joints
         )
+        print('\n move target_pos: ', self.target_pos)
+        print('\n move target_rpy: ', self.target_rpy)
+        print('joint_angles:', joint_angles)
 
         # 应用关节控制
         for i, joint_index in enumerate(self.controlled_joints):
@@ -455,6 +491,7 @@ class RobotWindow(QWidget):
         time.sleep(0.5)
 
     def setRobotPosAngle(self, posX, posY, posZ, angleR, angleP, angleY):
+        print(posX, posY, posZ, angleR, angleP, angleY)
         self.bullet_widget.setRobotPosAngle(posX, posY, posZ, angleR, angleP, angleY)
         
 if __name__ == "__main__":
