@@ -431,7 +431,19 @@ class RobotWindow(QWidget):
             )
             
             # 创建标签并设置字体大小
-            joint_label = QLabel(f"关节 {i+1}:")
+            if (i==0):
+                joint_range = "-160°~160°"
+            elif (i == 1):
+                joint_range = "0°~210°"
+            elif (i == 2):
+                joint_range = "-176°~0°"
+            elif (i == 3):
+                joint_range = "-150°~150°"
+            elif (i == 4):
+                joint_range = "-90°~90°"
+            elif (i == 5):
+                joint_range = "-90°~90°"
+            joint_label = QLabel(f"关节{i+1} : {joint_range}")
             joint_label.setStyleSheet("font-size: 16px;")  # 设置字体大小为16px
 
             slider_container = QVBoxLayout()  # 每个滑块单独一个垂直布局
