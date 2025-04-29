@@ -8,6 +8,7 @@ from base_protocol.motor_manager import ModeRun
 from base_protocol.serial_manager import SerialConnect
 from UI.robot_rander import RobotWindow,BulletWidget
 from UI.PDFViewWeb import PDFViewer
+import math
 
 #获取串口列表
 def get_serial_ports():
@@ -247,61 +248,73 @@ class WidgetApp(QWidget, Ui_MainWidget):
         pos1 = float(self.lineEdit_x_pos.text())
         pos2 = float(self.spinBox_x_pos.value())
         self.lineEdit_x_pos.setText(str(round(pos1 + pos2, 3)))
+        self.send_pos_or_angle(1)
 
     def on_x_pos_sub_clicked(self):
         pos1 = float(self.lineEdit_x_pos.text())
         pos2 = float(self.spinBox_x_pos.value())
         self.lineEdit_x_pos.setText(str(round(pos1 - pos2, 3)))
+        self.send_pos_or_angle(2)
 
     def on_y_pos_add_clicked(self):
         pos1 = float(self.lineEdit_y_pos.text())
         pos2 = float(self.spinBox_y_pos.value())
         self.lineEdit_y_pos.setText(str(round(pos1 + pos2, 3)))
+        self.send_pos_or_angle(3)
 
     def on_y_pos_sub_clicked(self):
         pos1 = float(self.lineEdit_y_pos.text())
         pos2 = float(self.spinBox_y_pos.value())
         self.lineEdit_y_pos.setText(str(round(pos1 - pos2, 3)))
+        self.send_pos_or_angle(4)
 
     def on_z_pos_add_clicked(self):
         pos1 = float(self.lineEdit_z_pos.text())
         pos2 = float(self.spinBox_z_pos.value())
         self.lineEdit_z_pos.setText(str(round(pos1 + pos2, 3)))
+        self.send_pos_or_angle(5)
 
     def on_z_pos_sub_clicked(self):
         pos1 = float(self.lineEdit_z_pos.text())
         pos2 = float(self.spinBox_z_pos.value())
         self.lineEdit_z_pos.setText(str(round(pos1 - pos2, 3)))
+        self.send_pos_or_angle(6)
 
     def on_x_angle_add_clicked(self):
         pos1 = float(self.lineEdit_x_angle.text())
         pos2 = float(self.spinBox_x_angle.value())
         self.lineEdit_x_angle.setText(str(round(pos1 + pos2, 3)))
+        self.send_pos_or_angle(7)
 
     def on_x_angle_sub_clicked(self):
         pos1 = float(self.lineEdit_y_angle.text())
         pos2 = float(self.spinBox_y_angle.value())
         self.lineEdit_y_angle.setText(str(round(pos1 - pos2, 3)))
+        self.send_pos_or_angle(8)
 
     def on_y_angle_add_clicked(self):
         pos1 = float(self.lineEdit_y_angle.text())
         pos2 = float(self.spinBox_y_angle.value())
         self.lineEdit_y_angle.setText(str(round(pos1 + pos2, 3)))
+        self.send_pos_or_angle(9)
 
     def on_y_angle_sub_clicked(self):
         pos1 = float(self.lineEdit_y_angle.text())
         pos2 = float(self.spinBox_y_angle.value())
         self.lineEdit_y_angle.setText(str(round(pos1 - pos2, 3)))
+        self.send_pos_or_angle(10)
 
     def on_z_angle_add_clicked(self):
         pos1 = float(self.lineEdit_z_angle.text())
         pos2 = float(self.spinBox_z_angle.value())
         self.lineEdit_z_angle.setText(str(round(pos1 + pos2, 3)))
+        self.send_pos_or_angle(11)
 
     def on_z_angle_sub_clicked(self):
         pos1 = float(self.lineEdit_z_angle.text())
         pos2 = float(self.spinBox_z_angle.value())
         self.lineEdit_z_angle.setText(str(round(pos1 - pos2, 3)))
+        self.send_pos_or_angle(12)
 
     def on_send_pos_angle_clicked(self):
         posX = round(float(self.spinBox_x_pos.text()), 3)
@@ -312,6 +325,36 @@ class WidgetApp(QWidget, Ui_MainWidget):
         angleY = round(float(self.spinBox_z_angle.text()), 3)
         self.label_tips.setText(f"发送的数据：\nX:{posX}, Y:{posY}, Z:{posZ}, \nRx:{angleR}, Ry:{angleP}, Rz:{angleY}")
         self.robotwindow.setRobotPosAngle(posX, posY, posZ, angleR, angleP, angleY)
+
+    def send_pos_or_angle(self, type):
+        target_pos , target_rpy = self.robotwindow.getRobotPosAngle()
+        if type == 1: #X+
+            target_pos[0] += (1 / 100)
+        elif type == 2: #X-
+            target_pos[0] += (-1 / 100)
+        elif type == 3: #Y+
+            target_pos[1] += (1 / 100)
+        elif type == 4: #Y-
+            target_pos[1] += (-1 / 100)
+        elif type == 5: #Z+
+            target_pos[2] += (1 / 100)
+        elif type == 6: #Z-
+            target_pos[2] += (-1 / 100)
+        elif type == 7: #Rx+
+            target_rpy[0] += math.radians(1)
+        elif type == 8: #Rx-
+            target_rpy[0] += math.radians(-1)
+        elif type == 9: #Ry+
+            target_rpy[1] += math.radians(1)
+        elif type == 10: #Ry-
+            target_rpy[1] += math.radians(-1)
+        elif type == 11: #Rz+
+            target_rpy[2] += math.radians(1)
+        elif type == 12: #Rz-
+            target_rpy[2] += math.radians(-1)
+        self.label_tips.setText(f"发送的数据：\nX:{target_pos[0]}, Y:{target_pos[1]}, Z:{target_pos[2]}, \nRx:{target_rpy[0]}, Ry:{target_rpy[1]}, Rz:{target_rpy[2]}")
+        self.robotwindow.setRobotPosAngle(target_pos[0], target_pos[1], target_pos[2], target_rpy[0], target_rpy[1], target_rpy[2])
+
 
 if __name__ == "__main__":
     QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)

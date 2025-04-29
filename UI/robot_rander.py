@@ -314,6 +314,7 @@ class BulletWidget(QWidget):
         self.target_rpy = list(p.getEulerFromQuaternion(current_end_orn))
         print('\n init target_pos: ', self.target_pos)
         print('\n init target_rpy: ', self.target_rpy)
+        return self.target_pos, self.target_rpy
         
 
     def setRobotPosAngle(self, posX, posY, posZ, angleR, angleP, angleY):
@@ -505,6 +506,9 @@ class RobotWindow(QWidget):
     def setRobotPosAngle(self, posX, posY, posZ, angleR, angleP, angleY):
         print(posX, posY, posZ, angleR, angleP, angleY)
         self.bullet_widget.setRobotPosAngle(posX, posY, posZ, angleR, angleP, angleY)
+
+    def getRobotPosAngle(self):
+        return self.bullet_widget.getRobotPosAngle()
         
 if __name__ == "__main__":
     app = QApplication(sys.argv)
