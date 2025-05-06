@@ -8,7 +8,6 @@ from base_protocol.motor_manager import ModeRun
 from base_protocol.serial_manager import SerialConnect
 from UI.robot_rander import RobotWindow,BulletWidget
 from UI.PDFViewWeb import PDFViewer
-import math
 
 #获取串口列表
 def get_serial_ports():
@@ -329,31 +328,41 @@ class WidgetApp(QWidget, Ui_MainWidget):
     def send_pos_or_angle(self, type):
         target_pos , target_rpy = self.robotwindow.getRobotPosAngle()
         if type == 1: #X+
-            target_pos[0] += (1 / 100)
+            self.robotwindow.setRobotPosAngle(1, target_pos[1], target_pos[2], target_rpy[0], target_rpy[1],
+                                              target_rpy[2])
         elif type == 2: #X-
-            target_pos[0] += (-1 / 100)
+            self.robotwindow.setRobotPosAngle(-1, target_pos[1], target_pos[2], target_rpy[0], target_rpy[1],
+                                              target_rpy[2])
         elif type == 3: #Y+
-            target_pos[1] += (1 / 100)
+            self.robotwindow.setRobotPosAngle(target_pos[0], 1, target_pos[2], target_rpy[0], target_rpy[1],
+                                              target_rpy[2])
         elif type == 4: #Y-
-            target_pos[1] += (-1 / 100)
+            self.robotwindow.setRobotPosAngle(target_pos[0], -1, target_pos[2], target_rpy[0], target_rpy[1],
+                                              target_rpy[2])
         elif type == 5: #Z+
-            target_pos[2] += (1 / 100)
+            self.robotwindow.setRobotPosAngle(target_pos[0], target_pos[1], 1, target_rpy[0], target_rpy[1],
+                                              target_rpy[2])
         elif type == 6: #Z-
-            target_pos[2] += (-1 / 100)
+            self.robotwindow.setRobotPosAngle(target_pos[0], target_pos[1], -1, target_rpy[0], target_rpy[1],
+                                              target_rpy[2])
         elif type == 7: #Rx+
-            target_rpy[0] += math.radians(1)
+            self.robotwindow.setRobotPosAngle(target_pos[0], target_pos[1], target_pos[2], 1, target_rpy[1],
+                                              target_rpy[2])
         elif type == 8: #Rx-
-            target_rpy[0] += math.radians(-1)
+            self.robotwindow.setRobotPosAngle(target_pos[0], target_pos[1], target_pos[2], -1, target_rpy[1],
+                                              target_rpy[2])
         elif type == 9: #Ry+
-            target_rpy[1] += math.radians(1)
+            self.robotwindow.setRobotPosAngle(target_pos[0], target_pos[1], target_pos[2], target_rpy[0], 1,
+                                              target_rpy[2])
         elif type == 10: #Ry-
-            target_rpy[1] += math.radians(-1)
+            self.robotwindow.setRobotPosAngle(target_pos[0], target_pos[1], target_pos[2], target_rpy[0], -1,
+                                              target_rpy[2])
         elif type == 11: #Rz+
-            target_rpy[2] += math.radians(1)
+            self.robotwindow.setRobotPosAngle(target_pos[0], target_pos[1], target_pos[2], target_rpy[0], target_rpy[1],
+                                              1)
         elif type == 12: #Rz-
-            target_rpy[2] += math.radians(-1)
-        self.label_tips.setText(f"发送的数据：\nX:{target_pos[0]}, Y:{target_pos[1]}, Z:{target_pos[2]}, \nRx:{target_rpy[0]}, Ry:{target_rpy[1]}, Rz:{target_rpy[2]}")
-        self.robotwindow.setRobotPosAngle(target_pos[0], target_pos[1], target_pos[2], target_rpy[0], target_rpy[1], target_rpy[2])
+            self.robotwindow.setRobotPosAngle(target_pos[0], target_pos[1], target_pos[2], target_rpy[0], target_rpy[1],
+                                              -1)
 
 
 if __name__ == "__main__":
