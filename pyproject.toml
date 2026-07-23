@@ -269,6 +269,7 @@ video_benchmark = ["scikit-image>=0.23.2,<0.26.0", "pandas>=2.2.2,<2.4.0"]
 aloha = ["lerobot[dataset]", "gym-aloha>=0.1.4,<0.2.0", "lerobot[scipy-dep]"]
 pusht = ["lerobot[dataset]", "gym-pusht>=0.1.5,<0.2.0", "pymunk>=6.6.0,<7.0.0"] # TODO: Fix pymunk version in gym-pusht instead
 edulite = ["lerobot[dataset]", "mujoco>=3.0.0,<4.0.0"] # EDULITE-A3 self-contained MuJoCo sim env
+so101 = ["lerobot[dataset]", "mujoco>=3.0.0,<4.0.0"] # SO-101 (SO-ARM100) self-contained MuJoCo sim env
 libero = ["lerobot[dataset]", "lerobot[transformers-dep]", "hf-libero>=0.1.4,<0.2.0; sys_platform == 'linux'", "lerobot[scipy-dep]"]
 metaworld = ["lerobot[dataset]", "metaworld==3.0.0", "lerobot[scipy-dep]"]
 # NOTE: vlabench is NOT exposed as a `lerobot` extra. Its only distribution
@@ -330,6 +331,7 @@ all = [
     "lerobot[aloha]",
     "lerobot[pusht]",
     "lerobot[edulite]",
+    "lerobot[so101]",
     "lerobot[phone]",
     "lerobot[libero]; sys_platform == 'linux'",
     "lerobot[metaworld]",
@@ -376,7 +378,7 @@ torch = [{ index = "pytorch-cu128", marker = "sys_platform == 'linux'" }]
 torchvision = [{ index = "pytorch-cu128", marker = "sys_platform == 'linux'" }]
 
 [tool.setuptools.package-data]
-lerobot = ["envs/*.json", "annotations/steerable_pipeline/prompts/*.txt", "envs/edulite/assets/*.urdf", "envs/edulite/assets/meshes/*.stl"]
+lerobot = ["envs/*.json", "annotations/steerable_pipeline/prompts/*.txt", "envs/edulite/assets/*.urdf", "envs/edulite/assets/meshes/*.stl", "envs/so101/assets/*.xml", "envs/so101/assets/*.stl", "envs/so101/assets/LICENSE"]
 
 [tool.setuptools.packages.find]
 where = ["src"]

@@ -176,3 +176,11 @@ outputs/
 *.urdf
 *.xml
 *.part
+
+# EDULITE-A3 self-contained sim assets (needed by lerobot.envs.edulite)
+!src/lerobot/envs/edulite/assets/*.urdf
+!src/lerobot/envs/edulite/assets/meshes/*.stl
+
+# SO-101 (SO-ARM100) self-contained sim assets
+!src/lerobot/envs/so101/assets/*.stl
+!src/lerobot/envs/so101/assets/*.xml
