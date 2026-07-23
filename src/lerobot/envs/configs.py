@@ -234,6 +234,130 @@ class PushtEnv(EnvConfig):
         }
 
 
+@EnvConfig.register_subclass("edulite")
+@dataclass
+class EduliteEnv(EnvConfig):
+    """EDULITE-A3 7-DOF arm MuJoCo simulation (reach task).
+
+    Self-contained: URDF + meshes are bundled under ``lerobot/envs/edulite/assets``.
+    The gym env is registered by importing ``lerobot.envs.edulite``.
+    """
+
+    task: str | None = "EduliteReach-v0"
+    fps: int = 25
+    episode_length: int = 200
+    obs_type: str = "pixels_agent_pos"
+    render_mode: str = "rgb_array"
+    observation_width: int = 640
+    observation_height: int = 480
+    visualization_width: int = 640
+    visualization_height: int = 480
+    features: dict[str, PolicyFeature] = field(
+        default_factory=lambda: {
+            ACTION: PolicyFeature(type=FeatureType.ACTION, shape=(7,)),
+            "agent_pos": PolicyFeature(type=FeatureType.STATE, shape=(7,)),
+        }
+    )
+    features_map: dict[str, str] = field(
+        default_factory=lambda: {
+            ACTION: ACTION,
+            "agent_pos": OBS_STATE,
+            "environment_state": OBS_ENV_STATE,
+            "pixels": OBS_IMAGE,
+        }
+    )
+
+    def __post_init__(self):
+        if self.obs_type == "pixels_agent_pos":
+            self.features["pixels"] = PolicyFeature(
+                type=FeatureType.VISUAL, shape=(self.observation_height, self.observation_width, 3)
+            )
+        elif self.obs_type == "environment_state_agent_pos":
+            self.features["environment_state"] = PolicyFeature(type=FeatureType.ENV, shape=(3,))
+
+    @property
+    def package_name(self) -> str:
+        # Self-contained env lives inside lerobot (not an external gym_* package).
+        return "lerobot.envs.edulite"
+
+    @property
+    def gym_id(self) -> str:
+        return f"gym_edulite/{self.task}"
+
+    @property
+    def gym_kwargs(self) -> dict:
+        return {
+            "obs_type": self.obs_type,
+            "render_mode": self.render_mode,
+            "observation_width": self.observation_width,
+            "observation_height": self.observation_height,
+            "visualization_width": self.visualization_width,
+            "visualization_height": self.visualization_height,
+            "max_episode_steps": self.episode_length,
+        }
+
+
+@EnvConfig.register_subclass("edulite_pick_place")
+@dataclass
+class EdulitePickPlaceEnv(EnvConfig):
+    """EDULITE-A3 pick-and-place task (grasp a ground sphere, place it on a target).
+
+    Self-contained MuJoCo env; grasping uses a runtime-toggled weld constraint.
+    """
+
+    task: str | None = "EdulitePickPlace-v0"
+    fps: int = 30
+    episode_length: int = 300
+    obs_type: str = "pixels_agent_pos"
+    render_mode: str = "rgb_array"
+    observation_width: int = 640
+    observation_height: int = 480
+    visualization_width: int = 960
+    visualization_height: int = 720
+    features: dict[str, PolicyFeature] = field(
+        default_factory=lambda: {
+            ACTION: PolicyFeature(type=FeatureType.ACTION, shape=(7,)),
+            "agent_pos": PolicyFeature(type=FeatureType.STATE, shape=(7,)),
+        }
+    )
+    features_map: dict[str, str] = field(
+        default_factory=lambda: {
+            ACTION: ACTION,
+            "agent_pos": OBS_STATE,
+            "environment_state": OBS_ENV_STATE,
+            "pixels": OBS_IMAGE,
+        }
+    )
+
+    def __post_init__(self):
+        if self.obs_type == "pixels_agent_pos":
+            self.features["pixels"] = PolicyFeature(
+                type=FeatureType.VISUAL, shape=(self.observation_height, self.observation_width, 3)
+            )
+        elif self.obs_type == "environment_state_agent_pos":
+            self.features["environment_state"] = PolicyFeature(type=FeatureType.ENV, shape=(9,))
+
+    @property
+    def package_name(self) -> str:
+        return "lerobot.envs.edulite"
+
+    @property
+    def gym_id(self) -> str:
+        return f"gym_edulite/{self.task}"
+
+    @property
+    def gym_kwargs(self) -> dict:
+        return {
+            "obs_type": self.obs_type,
+            "render_mode": self.render_mode,
+            "observation_width": self.observation_width,
+            "observation_height": self.observation_height,
+            "visualization_width": self.visualization_width,
+            "visualization_height": self.visualization_height,
+            "max_episode_steps": self.episode_length,
+        }
+
+
 @dataclass
 class ImagePreprocessingConfig:
     crop_params_dict: dict[str, tuple[int, int, int, int]] | None = None

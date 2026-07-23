@@ -79,6 +79,43 @@ def test_motor_layout_matches_edulite():
     assert [m[0] for m in _MOTOR_LAYOUT.values()] == [1, 2, 3, 4, 5, 6, 7]
 
 
+def test_config_motor_config_openarm_idiom():
+    """The config declares motors OpenArm-style: name -> (send_id, recv_id, model)."""
+    cfg = EduliteA3FollowerRobotConfig(port="can0")
+    assert list(cfg.motor_config) == ["L1", "L2", "L3", "L4", "L5", "L6", "L7"]
+    assert cfg.motor_config["L1"] == (1, 1, "O0")
+    assert cfg.motor_config["L7"] == (7, 7, "ELO5")
+    # per-joint MIT gains, one per joint
+    assert len(cfg.position_kp) == 7 and len(cfg.position_kd) == 7
+    # RS00 joints are stiffer than the EL05 wrist/gripper joints
+    assert cfg.position_kp[0] > cfg.position_kp[6]
+
+
+def test_per_joint_gains_written_on_configure():
+    """configure() must push each joint's own kp/kd from the config lists to the bus."""
+    bus_mock = _make_bus_mock()
+
+    def _bus_side_effect(*_args, **kwargs):
+        bus_mock.motors = kwargs["motors"]
+        bus_mock.sync_read.return_value = dict.fromkeys(bus_mock.motors, _RAW_PRESENT)
+        return bus_mock
+
+    with patch(
+        "lerobot.robots.edulite_a3_follower.edulite_a3_follower.RobstrideMotorsBus",
+        side_effect=_bus_side_effect,
+    ):
+        cfg = EduliteA3FollowerRobotConfig(port="can0", protocol="mit")
+        robot = EduliteA3Follower(cfg)
+        robot.connect()  # runs configure()
+
+    kp_calls = {c.args[1]: c.args[2] for c in bus_mock.write.call_args_list if c.args[0] == "Kp"}
+    kd_calls = {c.args[1]: c.args[2] for c in bus_mock.write.call_args_list if c.args[0] == "Kd"}
+    assert kp_calls["L1"] == cfg.position_kp[0]
+    assert kp_calls["L7"] == cfg.position_kp[6]
+    assert kd_calls["L4"] == cfg.position_kd[3]
+
+
+
 def test_connect_disconnect(follower):
     assert not follower.is_connected
     follower.connect()

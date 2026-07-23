@@ -268,6 +268,7 @@ video_benchmark = ["scikit-image>=0.23.2,<0.26.0", "pandas>=2.2.2,<2.4.0"]
 # NOTE: Explicitly listing scipy helps flatten the dependecy tree.
 aloha = ["lerobot[dataset]", "gym-aloha>=0.1.4,<0.2.0", "lerobot[scipy-dep]"]
 pusht = ["lerobot[dataset]", "gym-pusht>=0.1.5,<0.2.0", "pymunk>=6.6.0,<7.0.0"] # TODO: Fix pymunk version in gym-pusht instead
+edulite = ["lerobot[dataset]", "mujoco>=3.0.0,<4.0.0"] # EDULITE-A3 self-contained MuJoCo sim env
 libero = ["lerobot[dataset]", "lerobot[transformers-dep]", "hf-libero>=0.1.4,<0.2.0; sys_platform == 'linux'", "lerobot[scipy-dep]"]
 metaworld = ["lerobot[dataset]", "metaworld==3.0.0", "lerobot[scipy-dep]"]
 # NOTE: vlabench is NOT exposed as a `lerobot` extra. Its only distribution
@@ -328,6 +329,7 @@ all = [
     "lerobot[video_benchmark]",
     "lerobot[aloha]",
     "lerobot[pusht]",
+    "lerobot[edulite]",
     "lerobot[phone]",
     "lerobot[libero]; sys_platform == 'linux'",
     "lerobot[metaworld]",
@@ -374,7 +376,7 @@ torch = [{ index = "pytorch-cu128", marker = "sys_platform == 'linux'" }]
 torchvision = [{ index = "pytorch-cu128", marker = "sys_platform == 'linux'" }]
 
 [tool.setuptools.package-data]
-lerobot = ["envs/*.json", "annotations/steerable_pipeline/prompts/*.txt"]
+lerobot = ["envs/*.json", "annotations/steerable_pipeline/prompts/*.txt", "envs/edulite/assets/*.urdf", "envs/edulite/assets/meshes/*.stl"]
 
 [tool.setuptools.packages.find]
 where = ["src"]
